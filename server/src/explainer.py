@@ -19,3 +19,21 @@ class AIExplainer:
             metric_name=metric_name,
             score=score
         )
+
+    @staticmethod
+    def get_model_reasoning(model_name, task_type):
+        """Heuristic-based reasoning for why a model was chosen."""
+        reasoning = {
+            "Logistic Regression": "It provides a clear baseline and works well when relationships are linear.",
+            "Random Forest": "It captures complex, non-linear patterns and is robust to outliers in your data.",
+            "Linear Regression": "It is the gold standard for understanding direct linear relationships.",
+            "Random Forest Regressor": "It handles non-linear trends better than simple linear models."
+        }
+        return reasoning.get(model_name, "This model showed the most stable performance.")
+
+    @staticmethod
+    def generate_business_insights(best_model_name, score, task_type):
+        """Translates metrics into Business Impact."""
+        if task_type == "Classification":
+            return f"With {score*100:.1f}% accuracy, this model can automate categorization, reducing manual review time."
+        return f"The model explains {score*100:.1f}% of the variance, allowing for predictable budgeting."
