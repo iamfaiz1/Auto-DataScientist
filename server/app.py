@@ -16,7 +16,7 @@ st.markdown(
     .stMetric { background-color: #ffffff; padding: 15px; border-radius: 10px; border: 1px solid #e0e0e0; } 
     </style>
     """, 
-    unsafe_allow_html=True  # Change 'unsafe_allow_globals' to 'unsafe_allow_html'
+    unsafe_allow_html=True
 )
 
 st.title("🤖 Auto Data Science Assistant")
@@ -42,8 +42,10 @@ if uploaded_file:
         m4.metric("Missing Values", profile["Missing Values"])
         
         c1, c2 = st.columns(2)
-        with c1: st.plotly_chart(viz.plot_correlation_heatmap(), use_container_width=True)
-        with c2: st.dataframe(df.head(10))
+        with c1: 
+            st.plotly_chart(viz.plot_correlation_heatmap(), use_container_width=True)
+        with c2: 
+            st.dataframe(df.head(10))
 
     # --- 2. TARGET ANALYSIS ---
     st.divider()
@@ -63,18 +65,28 @@ if uploaded_file:
             results = trainer.run_pipeline()
             
             if results:
-                best_model = results
+                # --- CRITICAL FIX START ---
+                # 'results' is a LIST. We need the first DICTIONARY in that list.
+                best_model = results[0]
+                # --- CRITICAL FIX END ---
                 
                 st.success("### 🏆 Final Recommendation")
-                st.write(AIExplainer.explain_model_selection(best_model['model_name'], best_model['metric_name'], best_model['score']))
+                # Now best_model['model_name'] refers to a dictionary key, not a list index
+                st.write(AIExplainer.explain_model_selection(
+                    best_model['model_name'], 
+                    best_model['metric_name'], 
+                    best_model['score']
+                ))
                 
                 # Visual Explanations
                 st.divider()
                 col_a, col_b = st.columns(2)
                 with col_a:
                     st.subheader("Leaderboard")
+                    # We display the full list in the table
                     st.table(pd.DataFrame(results).drop(columns=['pipeline']))
                 with col_b:
+                    # We use the dictionary 'best_model' for the visualization
                     importance_plot = viz.plot_feature_importance(best_model['pipeline'], target_col)
                     if importance_plot:
                         st.plotly_chart(importance_plot, use_container_width=True)
