@@ -9,17 +9,55 @@ from src.visualizer import Visualizer
 st.set_page_config(page_title="AI Data Science Assistant", layout="wide", page_icon="🤖")
 
 # Custom CSS for a "Pro" Look
-st.markdown(
-    """
-    <style> 
-    .main { background-color: #f5f7f9; } 
-    .stMetric { background-color: #ffffff; padding: 15px; border-radius: 10px; border: 1px solid #e0e0e0; } 
-    </style>
-    """, 
-    unsafe_allow_html=True
-)
+st.markdown("""
+<style>
+
+/* Main app background */
+.stApp {
+    background-color: #020817;
+    color: white;
+}
+
+/* Metric cards */
+div[data-testid="metric-container"] {
+    background: #111827;
+    border: 1px solid #1f2937;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* Metric label */
+div[data-testid="metric-container"] label {
+    color: #94a3b8 !important;
+}
+
+/* Metric value */
+div[data-testid="metric-container"] div {
+    color: white !important;
+}
+
+/* Buttons */
+.stButton > button {
+    background-color: #4f46e5;
+    color: white;
+    border-radius: 8px;
+    border: none;
+    padding: 0.5rem 1rem;
+}
+
+
+h1, h2, h3 {
+    color: white;
+}
+
+</style>
+""", unsafe_allow_html=True)
 
 st.title("🤖 Auto Data Science Assistant")
+st.markdown("Automated Analysis, Model Recommendation, and Insights")
+st.divider()
+
 
 uploaded_file = st.file_uploader("Upload your dataset (CSV)", type=["csv"])
 
