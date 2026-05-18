@@ -1,0 +1,86 @@
+import streamlit as st
+import pandas as pd
+from src.data_profiler import DataProfiler
+from src.task_detector import TaskDetector
+from src.train_eval import Trainer
+from src.explainer import AIExplainer
+from src.visualizer import Visualizer
+
+st.set_page_config(page_title="AI Data Science Assistant", layout="wide", page_icon="🤖")
+
+# Custom CSS for a "Pro" Look
+st.markdown(
+    """
+    <style> 
+    .main { background-color: #f5f7f9; } 
+    .stMetric { background-color: #ffffff; padding: 15px; border-radius: 10px; border: 1px solid #e0e0e0; } 
+    </style>
+    """, 
+    unsafe_allow_html=True  # Change 'unsafe_allow_globals' to 'unsafe_allow_html'
+)
+
+st.title("🤖 Auto Data Science Assistant")
+
+uploaded_file = st.file_uploader("Upload your dataset (CSV)", type=["csv"])
+
+if uploaded_file:
+    # --- 1. DATA & PROFILING ---
+    df_raw = pd.read_csv(uploaded_file)
+    profiler = DataProfiler(df_raw)
+    df = profiler.optimize_memory()
+    viz = Visualizer(df)
+    
+    st.sidebar.header("Settings")
+    mode = st.sidebar.radio("User Level", ["Beginner", "Advanced"])
+
+    with st.expander("📊 1. Dataset Intelligence Report", expanded=True):
+        profile = profiler.generate_profile()
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Total Rows", profile["Total Rows"])
+        m2.metric("Total Columns", profile["Total Columns"])
+        m3.metric("Numeric Features", profile["Numerical Columns"])
+        m4.metric("Missing Values", profile["Missing Values"])
+        
+        c1, c2 = st.columns(2)
+        with c1: st.plotly_chart(viz.plot_correlation_heatmap(), use_container_width=True)
+        with c2: st.dataframe(df.head(10))
+
+    # --- 2. TARGET ANALYSIS ---
+    st.divider()
+    st.subheader("🎯 2. Select Prediction Target")
+    target_col = st.selectbox("What do you want to predict?", df.columns.tolist())
+    
+    detector = TaskDetector(df, target_col)
+    task_type = detector.detect()
+    
+    st.info(AIExplainer.explain_task(target_col, df[target_col].nunique(), str(df[target_col].dtype), task_type))
+    st.plotly_chart(viz.plot_target_distribution(target_col, task_type), use_container_width=True)
+
+    # --- 3. AUTO-ML PIPELINE ---
+    if st.button("🚀 Run AI Analysis"):
+        with st.spinner("🤖 Training models and generating insights..."):
+            trainer = Trainer(df, target_col, task_type)
+            results = trainer.run_pipeline()
+            
+            if results:
+                best_model = results
+                
+                st.success("### 🏆 Final Recommendation")
+                st.write(AIExplainer.explain_model_selection(best_model['model_name'], best_model['metric_name'], best_model['score']))
+                
+                # Visual Explanations
+                st.divider()
+                col_a, col_b = st.columns(2)
+                with col_a:
+                    st.subheader("Leaderboard")
+                    st.table(pd.DataFrame(results).drop(columns=['pipeline']))
+                with col_b:
+                    importance_plot = viz.plot_feature_importance(best_model['pipeline'], target_col)
+                    if importance_plot:
+                        st.plotly_chart(importance_plot, use_container_width=True)
+                    else:
+                        st.warning("Feature importance not available for this model type.")
+            
+            st.balloons()
+else:
+    st.info("Please upload a CSV file to begin the automated analysis.")
