@@ -10,7 +10,6 @@ __pycache__/
 *.env
 .env.*
 .db
-.streamlit
 
 node_modules/
 dist/
