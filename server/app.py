@@ -20,7 +20,7 @@ from src.business_insights import BusinessInsights
 from src.dashboard_layout import DashboardLayout
 
 st.set_page_config(
-    page_title="AI Data Science Assistant", 
+    page_title="Auto DataScientist", 
     layout="wide", 
     page_icon="🤖",
     initial_sidebar_state="expanded"
